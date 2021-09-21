@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 )
 
 // Increment, used to avoid doubled customer id
@@ -60,7 +62,7 @@ func (repo *CustomerRepositoryImpl) Delete(id int) {
 func (repo *CustomerRepositoryImpl) GetAll() ([]Customer, int) {
 	// Sort by customer id before return the result
 	sort.Slice(ListCustomers, func(i, j int) bool {
-		return ListCustomers[i].Id < ListCustomers[j].Id //cek ulang
+		return ListCustomers[i].Id < ListCustomers[j].Id
 	})
 
 	return ListCustomers, len(ListCustomers)
@@ -81,11 +83,17 @@ func (repo *CustomerRepositoryImpl) GetMinHour() []Customer {
 	sort.Slice(ListCustomers, func(i, j int) bool {
 		return ListCustomers[i].Hours < ListCustomers[j].Hours
 	})
+	if len(ListCustomers) >= 3 {
+		for i := 0; i < 3; i++ {
+			customers = append(customers, ListCustomers[i])
+		}
+	} else {
+		for i := 0; i < len(ListCustomers); i++ {
+			customers = append(customers, ListCustomers[i])
+		}
+	}
 
 	// Append to new customers list
-	for i := 0; i < 2; i++ {
-		customers = append(customers, ListCustomers[i])
-	}
 
 	return customers
 }
@@ -100,6 +108,7 @@ func (repo *CustomerRepositoryImpl) GetMinAverageUsage() []Customer {
 		if customer.Hours < AverageUsageHours {
 			customers = append(customers, customer)
 		}
+
 	}
 
 	return customers
@@ -138,14 +147,18 @@ func (view *CustomerViewImpl) MainMenu() {
 }
 
 func (view *CustomerViewImpl) AddNewCustomerMenu() {
+	var name string
 	var nama string
 	var waktu int
 
 	fmt.Println("===Tambah data Pelanggan WARNET===")
 	fmt.Print("Masukkan Nama Pelanggan \t\t: ")
-	fmt.Scan(&nama)
+	scan := bufio.NewReader(os.Stdin)
+	name, _ = scan.ReadString('\n')
+	nama = strings.TrimSpace(name)
+
 	fmt.Print("Waktu Penyewaan Komputer (jam) \t\t: ")
-	fmt.Scan(&waktu)
+	fmt.Scanln(&waktu)
 	// Untuk pemanggilan methode CustomRepository, dapat dilakukan dengan cara seperti ini
 	// Mungkin mirip dengan inheritance
 	view.Repo.Add(nama, waktu)
@@ -154,11 +167,12 @@ func (view *CustomerViewImpl) AddNewCustomerMenu() {
 }
 
 func (view *CustomerViewImpl) DeleteCustomerMenu() {
+	view.ShowAllCustomer()
 	var customerID int
 	fmt.Println("===Hapus data Pelanggan WARNET===")
 
 	fmt.Print("Masukkan ID Pelanggan \t\t: ")
-	fmt.Scan(&customerID)
+	fmt.Scanln(&customerID)
 	view.Repo.Delete(customerID)
 }
 
@@ -172,7 +186,7 @@ func (view *CustomerViewImpl) MinimumUsageMenu() {
 	fmt.Println("=== Data Pelanggan Penggunaan Paling sedikit ===")
 
 	fmt.Println("================================================================")
-	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
 			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
@@ -188,7 +202,7 @@ func (view *CustomerViewImpl) MinAverageUsageMenu() {
 	fmt.Println("=== Data Pelanggan Penggunaan dibawah Rerata ===")
 
 	fmt.Println("================================================================")
-	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
 			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
@@ -204,7 +218,7 @@ func (view *CustomerViewImpl) ShowAllCustomer() {
 	customers, total := view.Repo.GetAll()
 
 	fmt.Println("================================================================")
-	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
 			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
@@ -223,7 +237,7 @@ func main() {
 
 	for {
 		customerView.MainMenu()
-		fmt.Scan(&pilih)
+		fmt.Scanln(&pilih)
 
 		switch pilih {
 		case 1:
