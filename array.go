@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sort"
 )
+
+// Increment, used to avoid doubled customer id
+var Increment int = 0
 
 type Customer struct {
 	Id    int
@@ -19,7 +23,7 @@ type CustomerRepository interface {
 	Delete(id int)
 	GetAll() ([]Customer, int)
 	GetAverageHours() int
-	GetMinHour(count int) []Customer
+	GetMinHour() []Customer
 	GetMinAverageUsage() []Customer
 }
 
@@ -31,8 +35,9 @@ func NewCustomerRepository() CustomerRepository {
 }
 
 func (repo *CustomerRepositoryImpl) Add(name string, hours int) Customer {
+	Increment += 1
 	customer := Customer{
-		Id:    len(ListCustomers) + 1,
+		Id:    Increment,
 		Name:  name,
 		Hours: hours,
 		Price: hours * 60 * 1000,
@@ -69,7 +74,7 @@ func (repo *CustomerRepositoryImpl) GetAverageHours() int {
 	return counter / len(ListCustomers)
 }
 
-func (repo *CustomerRepositoryImpl) GetMinHour(count int) []Customer {
+func (repo *CustomerRepositoryImpl) GetMinHour() []Customer {
 	var customers []Customer
 
 	// Sort by Minimum Hours usage
@@ -78,7 +83,7 @@ func (repo *CustomerRepositoryImpl) GetMinHour(count int) []Customer {
 	})
 
 	// Append to new customers list
-	for i := 0; i < count; i++ {
+	for i := 0; i < 2; i++ {
 		customers = append(customers, ListCustomers[i])
 	}
 
@@ -100,47 +105,143 @@ func (repo *CustomerRepositoryImpl) GetMinAverageUsage() []Customer {
 	return customers
 }
 
-func main() {
-	var pilih int
+type CustomerView interface {
+	MainMenu()
+	AddNewCustomerMenu()
+	DeleteCustomerMenu()
+	AvarageUsageMenu()
+	MinimumUsageMenu()
+	MinAverageUsageMenu()
+	ShowAllCustomer()
+}
+
+// CustomerViewImpl, adalah implementasi (mirip) inheritance dari CustomerRepository
+// Contoh penggunaanya dapat dilihat di methode AddNewCustomerMenu()
+type CustomerViewImpl struct {
+	Repo CustomerRepository
+}
+
+func NewCustomerView(customerRepository CustomerRepository) CustomerView {
+	return &CustomerViewImpl{Repo: customerRepository}
+}
+
+func (view *CustomerViewImpl) MainMenu() {
+	fmt.Println("\n===MENU PENGOLAH DATA WARNET===")
+	fmt.Println("1. Memasukkan Data")
+	fmt.Println("2. Menghapus Data")
+	fmt.Println("3. Menampilkan Keseluruhan Data")
+	fmt.Println("4. Menampilkan Rata-Rata jumlah jam penggunaan")
+	fmt.Println("5. Menampilkan 3 buah data dengan jam penggunaan paling sedikit")
+	fmt.Println("6. Menampilkan data costumer dengan jumlah penyewaan komputer dibawah rata rata")
+	fmt.Println("0. Keluar")
+	fmt.Print("Masukkan Pilihan Anda \t\t: ")
+}
+
+func (view *CustomerViewImpl) AddNewCustomerMenu() {
 	var nama string
 	var waktu int
-	var x = true
-	customer := NewCustomerRepository()
 
-	for x {
-		fmt.Println("===MENU PENGOLAH DATA WARNET===")
-		fmt.Println("1. Memasukkan Data")
-		fmt.Println("2. Menghapus Data")
-		fmt.Println("3. Menampilkan Keseluruhan Data")
-		fmt.Println("4. Menampilkan Rata-Rata jumlah jam penggunaan")
-		fmt.Println("5. Menampilkan 3 buah data dengan jam penggunaan paling sedikit")
-		fmt.Println("6. Menampilkan data costumer dengan jumlah penyewaan komputer dibawah rata rata")
-		fmt.Print("Masukkan Pilihan Anda \t\t: ")
+	fmt.Println("===Tambah data Pelanggan WARNET===")
+	fmt.Print("Masukkan Nama Pelanggan \t\t: ")
+	fmt.Scan(&nama)
+	fmt.Print("Waktu Penyewaan Komputer (jam) \t\t: ")
+	fmt.Scan(&waktu)
+	// Untuk pemanggilan methode CustomRepository, dapat dilakukan dengan cara seperti ini
+	// Mungkin mirip dengan inheritance
+	view.Repo.Add(nama, waktu)
+	fmt.Println("Berhasil menambahkan data pelanggan!")
+	view.ShowAllCustomer()
+}
+
+func (view *CustomerViewImpl) DeleteCustomerMenu() {
+	var customerID int
+	fmt.Println("===Hapus data Pelanggan WARNET===")
+
+	fmt.Print("Masukkan ID Pelanggan \t\t: ")
+	fmt.Scan(&customerID)
+	view.Repo.Delete(customerID)
+}
+
+func (view *CustomerViewImpl) AvarageUsageMenu() {
+	avarageUsage := view.Repo.GetAverageHours()
+	fmt.Printf("Rata-rata Jam Penggunaan: %d", avarageUsage)
+}
+
+func (view *CustomerViewImpl) MinimumUsageMenu() {
+	customers := view.Repo.GetMinHour()
+	fmt.Println("=== Data Pelanggan Penggunaan Paling sedikit ===")
+
+	fmt.Println("================================================================")
+	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	for index, customer := range customers {
+		fmt.Printf(
+			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
+			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+		)
+	}
+	fmt.Println("================================================================")
+
+}
+
+func (view *CustomerViewImpl) MinAverageUsageMenu() {
+	customers := view.Repo.GetMinAverageUsage()
+	fmt.Println("=== Data Pelanggan Penggunaan dibawah Rerata ===")
+
+	fmt.Println("================================================================")
+	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	for index, customer := range customers {
+		fmt.Printf(
+			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
+			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+		)
+	}
+	fmt.Println("================================================================")
+
+}
+
+// ShowAllCustomer, digunakan hanya untuk menampilkan data customer
+func (view *CustomerViewImpl) ShowAllCustomer() {
+	customers, total := view.Repo.GetAll()
+
+	fmt.Println("================================================================")
+	fmt.Println("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
+	for index, customer := range customers {
+		fmt.Printf(
+			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
+			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+		)
+	}
+	fmt.Printf("\nTotal Pelanggan: %d\n", total)
+	fmt.Println("================================================================")
+
+}
+
+func main() {
+	var pilih int
+	customerRepository := NewCustomerRepository()
+	customerView := NewCustomerView(customerRepository)
+
+	for {
+		customerView.MainMenu()
 		fmt.Scan(&pilih)
 
 		switch pilih {
 		case 1:
-			fmt.Print("Masukkan Nama Anda \t\t: ")
-			fmt.Scan(&nama)
-			fmt.Print("Waktu Penyewaan Komputer (jam) \t: ")
-			fmt.Scan(&waktu)
-
-			customer.Add(nama, waktu)
-			// customer.Add("Asep", 3)
-			// customer.Add("Budi", 4)
-			// customer.Add("Calvin", 1)
-			// customer.Add("Deden", 1)
-			// customer.Add("Feri", 2)
-
+			customerView.AddNewCustomerMenu()
 		case 2:
+			customerView.DeleteCustomerMenu()
 		case 3:
-			fmt.Println(customer.GetAll())
+			customerView.ShowAllCustomer()
 		case 4:
-			fmt.Println(customer.GetAverageHours())
+			customerView.AvarageUsageMenu()
 		case 5:
+			customerView.MinimumUsageMenu()
+		case 6:
+			customerView.MinAverageUsageMenu()
+		case 0:
+			fmt.Println("Program berakhir...")
+			os.Exit(0)
 		}
 	}
 
-	fmt.Println(customer.GetMinHour(3))
-	fmt.Println(customer.GetMinAverageUsage())
 }
