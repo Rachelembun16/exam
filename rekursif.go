@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 )
 
@@ -52,30 +53,45 @@ func main() {
 	var batas int
 	var pilih int
 	var kata string
+	var yt string
+	var x = true
 
-	fmt.Println("1. Soal nomor 1")
-	fmt.Println("2. Soal nomor 2")
-	fmt.Println("3. Soal nomor 3")
-	fmt.Print("Masukkan pilihan soal \t:")
-	fmt.Scan(&pilih)
+	for x {
+		fmt.Println("1. Soal nomor 1")
+		fmt.Println("2. Soal nomor 2")
+		fmt.Println("3. Soal nomor 3")
+		fmt.Print("Masukkan pilihan soal \t:")
+		fmt.Scan(&pilih)
 
-	switch pilih {
-	case 1:
-		fmt.Print("Masukkan batasan: ")
-		fmt.Scan(&batas)
+		switch pilih {
+		case 1:
+			fmt.Print("Masukkan batasan: ")
+			fmt.Scan(&batas)
 
-		deret(batas)
-	case 2:
-		fmt.Print("Masukkan batasan: ")
-		fmt.Scan(&batas)
+			deret(batas)
+		case 2:
+			fmt.Print("Masukkan batasan: ")
+			fmt.Scan(&batas)
 
-		pecahan(batas)
-		fmt.Printf(" = %d/%dx", jumlahI, jumlah)
-	case 3:
-		fmt.Print("Masukkan sebuah kata: ")
-		fmt.Scan(&kata)
+			pecahan(batas)
+			fmt.Printf(" = %d/%dx", jumlahI, jumlah)
+		case 3:
+			fmt.Print("Masukkan sebuah kata: ")
+			fmt.Scan(&kata)
 
-		kapital(len(kata)-1, kata)
-		fmt.Printf("jumlah huruf kecil: %d", jumlah)
+			kapital(len(kata)-1, kata)
+			fmt.Printf("jumlah huruf kecil: %d", jumlah)
+		}
+		fmt.Print("\nLanjutkan Program? (y/t)")
+		fmt.Scan(&yt)
+
+		yt = strings.ToLower(yt)
+
+		if yt == "y" {
+			x = true
+		} else {
+			x = false
+		}
 	}
+
 }
