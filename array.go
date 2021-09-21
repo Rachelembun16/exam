@@ -55,7 +55,7 @@ func (repo *CustomerRepositoryImpl) Delete(id int) {
 func (repo *CustomerRepositoryImpl) GetAll() ([]Customer, int) {
 	// Sort by customer id before return the result
 	sort.Slice(ListCustomers, func(i, j int) bool {
-		return ListCustomers[i].Id < ListCustomers[j].Id
+		return ListCustomers[i].Id < ListCustomers[j].Id //cek ulang
 	})
 
 	return ListCustomers, len(ListCustomers)
@@ -101,15 +101,46 @@ func (repo *CustomerRepositoryImpl) GetMinAverageUsage() []Customer {
 }
 
 func main() {
+	var pilih int
+	var nama string
+	var waktu int
+	var x = true
 	customer := NewCustomerRepository()
-	customer.Add("Asep", 3)
-	customer.Add("Budi", 4)
-	customer.Add("Calvin", 1)
-	customer.Add("Deden", 1)
-	customer.Add("Feri", 2)
 
-	fmt.Println(customer.GetAll())
-	fmt.Println(customer.GetAverageHours())
+	for x {
+		fmt.Println("===MENU PENGOLAH DATA WARNET===")
+		fmt.Println("1. Memasukkan Data")
+		fmt.Println("2. Menghapus Data")
+		fmt.Println("3. Menampilkan Keseluruhan Data")
+		fmt.Println("4. Menampilkan Rata-Rata jumlah jam penggunaan")
+		fmt.Println("5. Menampilkan 3 buah data dengan jam penggunaan paling sedikit")
+		fmt.Println("6. Menampilkan data costumer dengan jumlah penyewaan komputer dibawah rata rata")
+		fmt.Print("Masukkan Pilihan Anda \t\t: ")
+		fmt.Scan(&pilih)
+
+		switch pilih {
+		case 1:
+			fmt.Print("Masukkan Nama Anda \t\t: ")
+			fmt.Scan(&nama)
+			fmt.Print("Waktu Penyewaan Komputer (jam) \t: ")
+			fmt.Scan(&waktu)
+
+			customer.Add(nama, waktu)
+			// customer.Add("Asep", 3)
+			// customer.Add("Budi", 4)
+			// customer.Add("Calvin", 1)
+			// customer.Add("Deden", 1)
+			// customer.Add("Feri", 2)
+
+		case 2:
+		case 3:
+			fmt.Println(customer.GetAll())
+		case 4:
+			fmt.Println(customer.GetAverageHours())
+		case 5:
+		}
+	}
+
 	fmt.Println(customer.GetMinHour(3))
 	fmt.Println(customer.GetMinAverageUsage())
 }
