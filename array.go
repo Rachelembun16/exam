@@ -4,12 +4,24 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 // Increment, used to avoid doubled customer id
 var Increment int = 0
+
+// formatCommas, digunakan untuk formating int ke ribuan
+func formatCommas(num int) string {
+	str := fmt.Sprintf("%d", num)
+	re := regexp.MustCompile("(\\d+)(\\d{3})")
+	for n := ""; n != str; {
+		n = str
+		str = re.ReplaceAllString(str, "$1,$2")
+	}
+	return str
+}
 
 type Customer struct {
 	Id    int
@@ -174,6 +186,7 @@ func (view *CustomerViewImpl) DeleteCustomerMenu() {
 	fmt.Print("Masukkan ID Pelanggan \t\t: ")
 	fmt.Scanln(&customerID)
 	view.Repo.Delete(customerID)
+	fmt.Println("Berhasil mengahpus data pelanggan!")
 }
 
 func (view *CustomerViewImpl) AvarageUsageMenu() {
@@ -189,8 +202,8 @@ func (view *CustomerViewImpl) MinimumUsageMenu() {
 	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
-			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
-			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+			"%d\t %d\t %s\t\t %d\t\t\t Rp. %s,00\n",
+			index+1, customer.Id, customer.Name, customer.Hours, formatCommas(customer.Price),
 		)
 	}
 	fmt.Println("================================================================")
@@ -205,8 +218,8 @@ func (view *CustomerViewImpl) MinAverageUsageMenu() {
 	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
-			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
-			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+			"%d\t %d\t %s\t\t %d\t\t\t Rp. %s,00\n",
+			index+1, customer.Id, customer.Name, customer.Hours, formatCommas(customer.Price),
 		)
 	}
 	fmt.Println("================================================================")
@@ -221,8 +234,8 @@ func (view *CustomerViewImpl) ShowAllCustomer() {
 	fmt.Printf("Nomor\t Id\t Nama\t\t Penggunaan\t\t Tagihan\n")
 	for index, customer := range customers {
 		fmt.Printf(
-			"%d\t %d\t %s\t\t %d\t\t\t %d\n",
-			index+1, customer.Id, customer.Name, customer.Hours, customer.Price,
+			"%d\t %d\t %s\t\t %d\t\t\t Rp. %s,00\n",
+			index+1, customer.Id, customer.Name, customer.Hours, formatCommas(customer.Price),
 		)
 	}
 	fmt.Printf("\nTotal Pelanggan: %d\n", total)
